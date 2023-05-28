@@ -45,9 +45,7 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   usersModel
     .create(req.body)
-    .then((users) => {
-      res.status(201).send({ users });
-    })
+    .then((users) => res.status(201).send({ users }))
     .catch((err) => {
       res.status(400).send({
         message: 'На сервере произошла ошибка',
