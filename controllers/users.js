@@ -49,7 +49,7 @@ const createUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.status(400).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
