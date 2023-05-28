@@ -45,8 +45,8 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   usersModel
     .create(req.body)
-    .then((user) => {
-      res.status(201).send(user);
+    .then((users) => {
+      res.status(201).send({ users });
     })
     .catch((err) => {
       res.status(400).send({
