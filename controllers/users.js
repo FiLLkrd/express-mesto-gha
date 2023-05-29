@@ -5,12 +5,8 @@ const getUsers = (req, res) => {
     .then((users) => {
       res.send(users);
     })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
+    .catch(() => {
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -48,6 +44,11 @@ const createUser = (req, res) => {
     .then((users) => res.status(201).send({ users }))
     .catch((err) => {
       res.status(400).send({
+        message: 'На сервере произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+      return res.status(500).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
