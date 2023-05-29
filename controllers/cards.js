@@ -84,14 +84,21 @@ const removeCard = (req, res) => {
 };
 
 const addCardLike = (req, res) => {
+  const { cardId } = req.params;
+  const userId = req.user._id;
+
+  if (!isValidObjectId(cardId)) {
+    return res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка' });
+  }
+
   cardsModel.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    cardId,
+    { $addToSet: { likes: userId } },
     { new: true },
   )
     .then((card) => {
       if (!card) {
-        return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
       }
       res.status(201).send(card.likes);
     })
@@ -105,14 +112,17 @@ const addCardLike = (req, res) => {
 };
 
 const removeCardLike = (req, res) => {
-  cardsModel.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  )
+  const { cardId } = req.params;
+  const userId = req.user._id;
+
+  if (!isValidObjectId(cardId)) {
+    return res.status(400).send({ message: 'Переданы некорректные данные для снятии лайка' });
+  }
+
+  cardsModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
       }
       res.status(200).send(card.likes);
     })
