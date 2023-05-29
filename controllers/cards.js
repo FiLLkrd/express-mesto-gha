@@ -91,7 +91,7 @@ const addCardLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
       }
       res.status(201).send(card.likes);
     })
@@ -112,7 +112,7 @@ const removeCardLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
       }
       res.status(200).send(card.likes);
     })
