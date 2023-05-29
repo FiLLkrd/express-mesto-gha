@@ -1,3 +1,9 @@
+const {
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+  BAD_REQUEST,
+  OK,
+} = require('../utils/errors');
 const usersModel = require('../models/users');
 
 const getUsers = (req, res) => {
@@ -6,7 +12,7 @@ const getUsers = (req, res) => {
       res.send(users);
     })
     .catch(() => {
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -19,18 +25,18 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({
+        return res.status(NOT_FOUND).send({
           message: 'Пользователь с указанным _id не найден',
         });
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'Переданы некорректные данные',
           err: err.message,
           stack: err.stack,
         });
       }
-      return res.status(500).send({
+      return res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
@@ -41,14 +47,14 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   usersModel
     .create(req.body)
-    .then((users) => res.status(201).send({ users }))
+    .then((users) => res.status(OK).send({ users }))
     .catch((err) => {
-      res.status(400).send({
+      res.status(BAD_REQUEST).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
       });
-      return res.status(500).send({
+      return res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
@@ -72,13 +78,13 @@ const updateUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'переданы некорректные данные в методы обновления пользователя или профиля',
           err: err.message,
           stack: err.stack,
         });
       }
-      return res.status(500).send({
+      return res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
@@ -102,13 +108,13 @@ const updateAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'переданы некорректные данные в методы обновления аватара',
           err: err.message,
           stack: err.stack,
         });
       }
-      return res.status(500).send({
+      return res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,

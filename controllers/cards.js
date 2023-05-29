@@ -2,6 +2,13 @@
 /* eslint-disable no-shadow */
 const { isValidObjectId } = require('mongoose');
 const cardsModel = require('../models/cards');
+const {
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+  BAD_REQUEST,
+  OK,
+  CREATED,
+} = require('../utils/errors');
 
 const getCards = (req, res) => {
   cardsModel
@@ -19,7 +26,7 @@ const getCards = (req, res) => {
       owner,
       likes,
     }))))
-    .catch((err) => res.status(500).send({
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send({
       message: 'На сервере произошла ошибка',
       err: err.message,
       stack: err.stack,
@@ -37,7 +44,7 @@ const createCard = (req, res) => {
       link,
       owner,
       likes,
-    }) => res.status(201).send({
+    }) => res.status(CREATED).send({
       _id,
       name,
       link,
@@ -46,13 +53,13 @@ const createCard = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message: 'Переданы некорректные данные при создании карточки',
           err: err.message,
           stack: err.stack,
         });
       } else {
-        res.status(500).send({
+        res.status(INTERNAL_SERVER_ERROR).send({
           message: 'На сервере произошла ошибка',
           err: err.message,
           stack: err.stack,
@@ -65,17 +72,17 @@ const removeCard = (req, res) => {
   const { cardId } = req.params;
 
   if (!isValidObjectId(cardId)) {
-    return res.status(400).send({ message: 'Переданы некорректные данные для удаления карточки' });
+    return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки' });
   }
   cardsModel.deleteOne({ _id: cardId })
     .then(({ deletedCount }) => {
       if (!deletedCount) {
-        return res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
       }
-      return res.status(200).send({ message: 'Карточка удалена' });
+      return res.status(OK).send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
@@ -88,7 +95,7 @@ const addCardLike = (req, res) => {
   const userId = req.user._id;
 
   if (!isValidObjectId(cardId)) {
-    return res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка' });
+    return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' });
   }
 
   cardsModel.findByIdAndUpdate(
@@ -98,12 +105,12 @@ const addCardLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       }
-      res.status(201).send(card.likes);
+      res.status(CREATED).send(card.likes);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
@@ -116,18 +123,18 @@ const removeCardLike = (req, res) => {
   const userId = req.user._id;
 
   if (!isValidObjectId(cardId)) {
-    return res.status(400).send({ message: 'Переданы некорректные данные для снятии лайка' });
+    return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятии лайка' });
   }
 
   cardsModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Передан несуществующий _id карточки' });
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       }
-      res.status(200).send(card.likes);
+      res.status(OK).send(card.likes);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
         err: err.message,
         stack: err.stack,
