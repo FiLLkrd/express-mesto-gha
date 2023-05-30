@@ -50,7 +50,7 @@ const createUser = (req, res) => {
     .then((users) => res.status(OK).send({ users }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({
+        return res.status(BAD_REQUEST).send({
           message: 'На сервере произошла ошибка',
           err: err.message,
           stack: err.stack,
