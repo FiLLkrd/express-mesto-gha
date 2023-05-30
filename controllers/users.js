@@ -49,15 +49,15 @@ const createUser = (req, res) => {
     .create(req.body)
     .then((users) => res.status(OK).send({ users }))
     .catch((err) => {
-      res.status(BAD_REQUEST).send({
-        message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({
+          message: 'На сервере произошла ошибка',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
       return res.status(INTERNAL_SERVER_ERROR).send({
         message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
       });
     });
 };
