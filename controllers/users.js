@@ -4,10 +4,11 @@ const {
   BAD_REQUEST,
   OK,
 } = require('../utils/errors');
-const usersModel = require('../models/users');
+
+const User = require('../models/users');
 
 const getUsers = (req, res) => {
-  usersModel.find({})
+  User.find({})
     .then((users) => {
       res.send(users);
     })
@@ -17,7 +18,7 @@ const getUsers = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  usersModel
+  User
     .findById(req.params.userId)
     .orFail()
     .then((users) => {
@@ -45,8 +46,11 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  usersModel
-    .create(req.body)
+  User
+    .create({
+      email: req.body.email,
+      password: req.body.password,
+    })
     .then((users) => res.status(OK).send({ users }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -64,7 +68,7 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, about } = req.body;
-  usersModel
+  User
     .findByIdAndUpdate(
       req.user._id,
       { name, about },
@@ -94,7 +98,7 @@ const updateUser = (req, res) => {
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  usersModel
+  User
     .findByIdAndUpdate(
       req.user._id,
       { avatar },
