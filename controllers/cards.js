@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-shadow */
 const { isValidObjectId } = require('mongoose');
-const Cards = require('../models/cards');
+const Card = require('../models/cards');
 const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
@@ -11,7 +11,7 @@ const {
 } = require('../utils/errors');
 
 const getCards = (req, res) => {
-  Cards
+  Card
     .find({})
     .then((cards) => res.send(cards.map(({
       _id,
@@ -37,7 +37,7 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
-  Cards.create({ name, link, owner })
+  Card.create({ name, link, owner })
     .then(({
       _id,
       name,
@@ -70,16 +70,15 @@ const createCard = (req, res) => {
 
 const removeCard = (req, res) => {
   const { cardId } = req.params;
-
-  if (!isValidObjectId(cardId)) {
-    return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки' });
-  }
-  Cards.deleteOne({ _id: cardId })
-    .then(({ deletedCount }) => {
-      if (!deletedCount) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
+  const userId = req.user._id;
+  Card.findById(cardId)
+    .orFail()
+    .then((card) => {
+      const ownerId = card.owner;
+      if (String(ownerId) !== userId) {
+        return res.status(BAD_REQUEST).send({ message: 'У вас нет доступа к удалению данной карточки' });
       }
-      return res.status(OK).send({ message: 'Карточка удалена' });
+      return card.deleteOne().then(() => res.status(OK).send({ data: card }));
     })
     .catch((err) => {
       res.status(INTERNAL_SERVER_ERROR).send({
@@ -98,7 +97,7 @@ const addCardLike = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' });
   }
 
-  Cards.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: userId } },
     { new: true },
@@ -126,7 +125,7 @@ const removeCardLike = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятии лайка' });
   }
 
-  Cards.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
