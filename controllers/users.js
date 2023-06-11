@@ -59,7 +59,7 @@ const getUserById = (req, res, next) => {
       if (!user) {
         throw new ErrNotFound('Пользователь не найден');
       }
-      res.send({ data: user });
+      res.status(OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
