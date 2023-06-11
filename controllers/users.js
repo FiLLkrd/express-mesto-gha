@@ -18,7 +18,7 @@ const getUserInfo = (req, res, next) => {
       if (!user) {
         throw new ErrNotFound('Пользователь не найден');
       }
-      res.status(OK).send(user);
+      res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
