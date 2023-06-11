@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
+const { ErrConflictUser, ErrBadRequest } = require('../utils/ErrConflictUser');
 const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
@@ -94,28 +95,34 @@ const getUserById = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      email: req.body.email,
-      password: hash,
-    }))
-    .then((user) => res.status(OK).send({
-      _id: user._id,
-      email: user.email,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'На сервере произошла ошибка',
-          err: err.message,
-          stack: err.stack,
-        });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10).then((hash) => {
+    User
+      .create({
+        name, about, avatar, email, password: hash,
+      })
+      .then(() => res.status(OK).send(
+        {
+          data: {
+            name, about, avatar, email,
+          },
+        },
+      ))
+      // eslint-disable-next-line consistent-return
+      .catch((err) => {
+        if (err.name === 'MongoServerError') {
+          return next(new ErrConflictUser('Пользователь с таким email уже существует'));
+        }
+        if (err.name === 'ValidationError') {
+          return next(new ErrBadRequest('переданы некорректные данные в метод'));
+        }
+        next(err);
       });
-    });
+  })
+    .catch(next);
 };
 
 const updateUser = (req, res) => {
