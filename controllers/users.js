@@ -10,6 +10,7 @@ const {
   BAD_REQUEST,
   OK,
 } = require('../utils/errors');
+const ErrNotFound = require('../utils/ErrNotFound');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -70,32 +71,22 @@ const getUsers = (req, res) => {
     });
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User
     .findById(userId)
-    .orFail()
-    .then((users) => {
-      res.status(OK).send({ users });
+    .then((user) => {
+      if (!user) {
+        throw new ErrNotFound('Пользователь не найден');
+      }
+      res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({
-          message: 'Пользователь с указанным _id не найден',
-        });
-      }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-          err: err.message,
-          stack: err.stack,
-        });
+        next(new ErrBadRequest('Переданы некорректные данные'));
+        return;
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
+      next(err);
     });
 };
 
