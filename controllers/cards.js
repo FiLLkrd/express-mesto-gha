@@ -40,7 +40,7 @@ const removeCard = (req, res, next) => {
       if (req.user._id === owner) {
         Card.deleteOne(card)
           .then(() => {
-            res.send(card);
+            res.status(OK).send(card);
           })
           .catch(next);
       } else {
