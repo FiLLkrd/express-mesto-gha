@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const router = require('./routes/index');
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { createUserValid, loginValid } = require('./middlewares/validation');
 const ErrNotFound = require('./utils/ErrNotFound');
@@ -15,7 +16,8 @@ app.use(bodyParser.json());
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
 
-app.use(router);
+app.use(userRouter);
+app.use(cardRouter);
 app.use((req, res, next) => {
   next(new ErrNotFound('Страница по данному адресу не найдена'));
 });

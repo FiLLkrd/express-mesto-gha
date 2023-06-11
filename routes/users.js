@@ -16,14 +16,14 @@ const {
 
 router.use(auth);
 
-router.get('/', getUsers);
+router.get('/users', getUsers);
 
-router.get('/me', getUserInfo);
+router.get('/users/me', getUserInfo);
 
-router.get('/:userId', getUserByIdValid, getUserById);
+router.get('/users/:userId', getUserByIdValid, getUserById);
 
-router.patch('/me/avatar', updateUserAvatarValid, updateAvatar);
+router.patch('/users/me/avatar', updateUserAvatarValid, updateAvatar);
 
-router.patch('/me', updateUserValid, updateUser);
+router.patch('/users/me', updateUserValid, updateUser);
 
 module.exports = router;

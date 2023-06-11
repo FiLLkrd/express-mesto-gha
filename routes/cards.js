@@ -12,14 +12,14 @@ const {
   cardIdValid,
 } = require('../middlewares/validation');
 
-router.get('/', getCards);
+router.get('/cards', getCards);
 
-router.post('/', createCardValid, createCard);
+router.post('/cards', createCardValid, createCard);
 
-router.delete('/:cardId', cardIdValid, removeCard);
+router.delete('/cards/:cardId', cardIdValid, removeCard);
 
-router.put('/:cardId/likes', cardIdValid, addCardLike);
+router.put('/cards/:cardId/likes', cardIdValid, addCardLike);
 
-router.delete('/:cardId/likes', cardIdValid, removeCardLike);
+router.delete('/cards/:cardId/likes', cardIdValid, removeCardLike);
 
 module.exports = router;
