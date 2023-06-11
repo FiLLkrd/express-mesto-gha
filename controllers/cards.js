@@ -49,7 +49,7 @@ const removeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ErrBadRequest('Переданы некорректные данные для удаления карточки'));
+        next(new ErrForBidden('Переданы некорректные данные для удаления карточки'));
       } else {
         next(err);
       }
@@ -91,7 +91,7 @@ const removeCardLike = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new ErrForBidden('Переданы некорректные данные для удаления лайка'));
+        return next(new ErrBadRequest('Переданы некорректные данные для удаления лайка'));
       }
       return next(err);
     });
