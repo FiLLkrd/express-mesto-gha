@@ -91,7 +91,7 @@ const removeCardLike = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new ErrBadRequest('Переданы некорректные данные для удаления лайка'));
+        return next(new ErrForBidden('Переданы некорректные данные для удаления лайка'));
       }
       return next(err);
     });
