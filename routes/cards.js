@@ -1,7 +1,4 @@
 const router = require('express').Router();
-const { Joi, celebrate } = require('celebrate');
-const patternValid = require('../utils/patternValid');
-const auth = require('../middlewares/auth');
 const {
   getCards,
   createCard,
@@ -10,31 +7,19 @@ const {
   removeCardLike,
 } = require('../controllers/cards');
 
-router.get('/cards', auth, getCards);
+const {
+  createCardValid,
+  cardIdValid,
+} = require('../middlewares/validation');
 
-router.post('/cards', auth, celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(patternValid),
-  }),
-}), createCard);
+router.get('/', getCards);
 
-router.delete('/cards/:cardId', auth, celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
-  }),
-}), removeCard);
+router.post('/', createCardValid, createCard);
 
-router.put('/cards/:cardId/likes', auth, celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
-  }),
-}), addCardLike);
+router.delete('/:cardId', cardIdValid, removeCard);
 
-router.delete('/cards/:cardId/likes', auth, celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
-  }),
-}), removeCardLike);
+router.put('/:cardId/likes', cardIdValid, addCardLike);
+
+router.delete('/:cardId/likes', cardIdValid, removeCardLike);
 
 module.exports = router;
