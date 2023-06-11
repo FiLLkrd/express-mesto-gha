@@ -12,26 +12,6 @@ const {
 } = require('../utils/errors');
 const ErrNotFound = require('../utils/ErrNotFound');
 
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-  User.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
-      }
-      return bcrypt.compare(password, user.password)
-        .then((mathed) => {
-          if (!mathed) {
-            return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
-          }
-          return res.send({
-            token: jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }),
-          });
-        });
-    })
-    .catch(next);
-};
-
 const getUserInfo = (req, res) => {
   const userId = req.user._id;
   User
@@ -90,6 +70,56 @@ const getUserById = (req, res, next) => {
     });
 };
 
+const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  User
+    .findByIdAndUpdate(
+      req.user._id,
+      { avatar },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({
+          message: 'переданы некорректные данные в методы обновления аватара',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({
+        message: 'На сервере произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
+      }
+      return bcrypt.compare(password, user.password)
+        .then((mathed) => {
+          if (!mathed) {
+            return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
+          }
+          return res.send({
+            token: jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }),
+          });
+        });
+    })
+    .catch(next);
+};
+
 const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
@@ -138,36 +168,6 @@ const updateUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
           message: 'переданы некорректные данные в методы обновления пользователя или профиля',
-          err: err.message,
-          stack: err.stack,
-        });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
-};
-
-const updateAvatar = (req, res) => {
-  const { avatar } = req.body;
-  User
-    .findByIdAndUpdate(
-      req.user._id,
-      { avatar },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'переданы некорректные данные в методы обновления аватара',
           err: err.message,
           stack: err.stack,
         });
