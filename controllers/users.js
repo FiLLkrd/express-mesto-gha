@@ -5,39 +5,27 @@ const ErrConflictUser = require('../utils/ErrConflictUser');
 const ErrBadRequest = require('../utils/ErrBadRequest');
 const ErrNotAuth = require('../utils/ErrNotAuth');
 const {
-  NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   BAD_REQUEST,
   OK,
 } = require('../utils/errors');
 const ErrNotFound = require('../utils/ErrNotFound');
 
-const getUserInfo = (req, res) => {
-  const userId = req.user._id;
+const getUserInfo = (req, res, next) => {
   User
-    .findById(userId)
-    .orFail()
-    .then((users) => {
-      res.status(OK).send({ users });
+    .findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new ErrNotFound('Пользователь не найден');
+      }
+      res.status(OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOT_FOUND).send({
-          message: 'Пользователь с указанным _id не найден',
-        });
-      }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-          err: err.message,
-          stack: err.stack,
-        });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
+        next(ErrBadRequest('Переданы некорректные данные'));
+      } else if (err.message === 'Not Found') {
+        next(new ErrNotFound('Пользователь не найден'));
+      } else next(err);
     });
 };
 
@@ -59,7 +47,7 @@ const getUserById = (req, res, next) => {
       if (!user) {
         throw new ErrNotFound('Пользователь не найден');
       }
-      res.status(OK).send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
