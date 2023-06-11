@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
-const { ErrConflictUser, ErrBadRequest } = require('../utils/ErrConflictUser');
+const ErrConflictUser = require('../utils/ErrConflictUser');
+const ErrBadRequest = require('../utils/ErrBadRequest');
+const ErrNotAuth = require('../utils/ErrNotAuth');
 const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
@@ -9,22 +11,24 @@ const {
   OK,
 } = require('../utils/errors');
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
+  User.findOne({ email }).select('+password')
     .then((user) => {
-      res.send({
-        token: jwt.sign(
-          { id: user._id },
-          'super-strong-secret',
-          { expiresIn: '7d' },
-        ),
-      });
+      if (!user) {
+        return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
+      }
+      return bcrypt.compare(password, user.password)
+        .then((mathed) => {
+          if (!mathed) {
+            return Promise.reject(new ErrNotAuth('Неправильные почта или пароль'));
+          }
+          return res.send({
+            token: jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }),
+          });
+        });
     })
-    .catch((err) => {
-      res.status(BAD_REQUEST).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 const getUserInfo = (req, res) => {
@@ -104,7 +108,7 @@ const createUser = (req, res, next) => {
       .create({
         name, about, avatar, email, password: hash,
       })
-      .then(() => res.status(201).send(
+      .then(() => res.status(OK).send(
         {
           data: {
             name, about, avatar, email,
