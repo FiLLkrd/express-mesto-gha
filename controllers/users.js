@@ -32,7 +32,7 @@ const getUserInfo = (req, res, next) => {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      res.send(users);
+      res.status(200).send(users);
     })
     .catch(() => {
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
