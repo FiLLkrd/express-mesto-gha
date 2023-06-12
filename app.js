@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
+const auth = require('./middlewares/auth');
 const router = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const { createUserValid, loginValid } = require('./middlewares/validation');
@@ -8,13 +9,14 @@ const ErrNotFound = require('./utils/ErrNotFound');
 
 const app = express();
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
+router.use(auth);
 
-app.use(router);
+app.use('/', router);
 app.use((req, res, next) => {
   next(new ErrNotFound('Страница по данному адресу не найдена'));
 });
