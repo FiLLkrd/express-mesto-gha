@@ -2,17 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
-const { login, createUser } = require('./controllers/users');
-const { createUserValid, loginValid } = require('./middlewares/validation');
 const ErrNotFound = require('./utils/ErrNotFound');
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.post('/signin', loginValid, login);
-app.post('/signup', createUserValid, createUser);
 
 app.use(router);
 app.use((req, res, next) => {
@@ -27,7 +22,6 @@ app.use((err, req, res, next) => {
       ? 'На сервере произошла ошибка'
       : message,
   });
-  console.log(err);
   next();
 });
 
