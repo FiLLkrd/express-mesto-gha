@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
@@ -10,6 +9,7 @@ const ErrNotFound = require('./utils/ErrNotFound');
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);

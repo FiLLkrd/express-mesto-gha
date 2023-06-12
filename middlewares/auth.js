@@ -5,7 +5,7 @@ const ErrNotAuth = require('../utils/ErrNotAuth');
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.starWith('Bearer ')) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     throw new ErrNotAuth('Необходима авторизация');
   }
 
