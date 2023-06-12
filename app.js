@@ -10,7 +10,6 @@ const ErrNotFound = require('./utils/ErrNotFound');
 const app = express();
 
 app.use(express.json());
-app.use(bodyParser.json());
 
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
