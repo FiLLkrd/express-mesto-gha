@@ -8,6 +8,7 @@ const {
   INTERNAL_SERVER_ERROR,
   BAD_REQUEST,
   OK,
+  CREATED,
 } = require('../utils/errors');
 const ErrNotFound = require('../utils/ErrNotFound');
 
@@ -137,7 +138,7 @@ const createUser = (req, res, next) => {
       .create({
         name, about, avatar, email, password: hash,
       })
-      .then(() => res.status(OK).send(
+      .then(() => res.status(CREATED).send(
         {
           data: {
             name, about, avatar, email,
