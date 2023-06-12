@@ -11,14 +11,12 @@ const {
 } = require('../utils/errors');
 const ErrNotFound = require('../utils/ErrNotFound');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((data) => {
       res.send({ data });
     })
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
