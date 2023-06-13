@@ -5,7 +5,6 @@ const ErrConflictUser = require('../utils/ErrConflictUser');
 const ErrBadRequest = require('../utils/ErrBadRequest');
 const ErrNotAuth = require('../utils/ErrNotAuth');
 const {
-  BAD_REQUEST,
   OK,
   CREATED,
 } = require('../utils/errors');
@@ -79,9 +78,8 @@ const updateAvatar = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'переданы некорректные данные в методы обновления аватара',
-        });
+        next(new ErrBadRequest('Переданы некорректные данные'));
+        return;
       }
       next(err);
     });
