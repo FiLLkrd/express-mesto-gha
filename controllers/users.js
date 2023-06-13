@@ -55,9 +55,8 @@ const updateUser = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'переданы некорректные данные',
-        });
+        next(new ErrBadRequest('Переданы некорректные данные'));
+        return;
       }
       next(err);
     });
