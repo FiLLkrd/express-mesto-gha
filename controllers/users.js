@@ -5,7 +5,6 @@ const ErrConflictUser = require('../utils/ErrConflictUser');
 const ErrBadRequest = require('../utils/ErrBadRequest');
 const ErrNotAuth = require('../utils/ErrNotAuth');
 const {
-  INTERNAL_SERVER_ERROR,
   BAD_REQUEST,
   OK,
   CREATED,
@@ -39,7 +38,7 @@ const getUserById = (req, res, next) => {
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User
     .findByIdAndUpdate(
@@ -53,19 +52,18 @@ const updateUser = (req, res) => {
     .then((user) => {
       res.send(user);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
           message: 'переданы некорректные данные',
         });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-      });
+      next(err);
     });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User
     .findByIdAndUpdate(
@@ -79,15 +77,14 @@ const updateAvatar = (req, res) => {
     .then((user) => {
       res.send(user);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
           message: 'переданы некорректные данные в методы обновления аватара',
         });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-      });
+      next(err);
     });
 };
 
