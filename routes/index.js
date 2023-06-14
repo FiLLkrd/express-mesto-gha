@@ -2,7 +2,6 @@ const router = require('express').Router();
 const ErrNotFound = require('../utils/ErrNotFound');
 const { login, createUser } = require('../controllers/users');
 const { createUserValid, loginValid } = require('../middlewares/validation');
-
 const usersRouter = require('./users');
 const cardsRouter = require('./cards');
 
